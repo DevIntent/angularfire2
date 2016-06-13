@@ -1,25 +1,17 @@
-export abstract class AuthBackend {
-  abstract authWithCustomToken(token: string, options?: any): Promise<FirebaseAuthState>;
-  abstract authAnonymously(options?: any): Promise<FirebaseAuthState>;
-  abstract authWithPassword(credentials: FirebaseCredentials, options?: any): Promise<FirebaseAuthState>;
-  abstract authWithOAuthPopup(provider: AuthProviders, options?: any): Promise<FirebaseAuthState>;
-  abstract authWithOAuthRedirect(provider: AuthProviders, options?: any): Promise<FirebaseAuthState>;
-  abstract authWithOAuthToken(provider: AuthProviders, credentialsObj: OAuthCredentials, options?: any)
-    : Promise<FirebaseAuthState>;
-  abstract onAuth(onComplete: (authData: FirebaseAuthData) => void): void;
-  abstract getAuth(): FirebaseAuthData;
-  abstract unauth(): void;
-  abstract createUser(credentials: FirebaseCredentials): Promise<FirebaseAuthData>;
-}
+import { Observable } from 'rxjs/Observable';
 
-// Firebase only provides typings for google
-export interface FirebaseAuthDataAllProviders extends FirebaseAuthData {
-  github?: any;
-  twitter?: any;
-  google?: any;
-  facebook?: any;
-  password?: any;
-  anonymous?: any;
+export abstract class AuthBackend {
+  abstract authWithCustomToken(token: AuthToken): Promise<FirebaseAuthState>;
+  abstract authAnonymously(options?: any): Promise<FirebaseAuthState>;
+  abstract authWithPassword(credentials: EmailPasswordCredentials): Promise<FirebaseAuthState>;
+  abstract authWithOAuthPopup(provider: AuthProviders, options?: any): Promise<firebase.auth.UserCredential>;
+  abstract authWithOAuthRedirect(provider: AuthProviders, options?: any): Promise<void>;
+  abstract authWithOAuthToken(credentialsObj: firebase.auth.AuthCredential, options?: any)
+    : Promise<FirebaseAuthState>;
+  abstract onAuth(): Observable<FirebaseAuthState>;
+  abstract getAuth(): FirebaseAuthState;
+  abstract unauth(): void;
+  abstract createUser(credentials: EmailPasswordCredentials): Promise<FirebaseAuthState>;
 }
 
 export enum AuthProviders {
@@ -41,7 +33,6 @@ export enum AuthMethods {
   CustomToken
 };
 
-
 export interface AuthConfiguration {
   method?: AuthMethods;
   provider?: AuthProviders;
@@ -49,26 +40,12 @@ export interface AuthConfiguration {
   scope?: string[];
 }
 
-export interface OAuth2Credentials {
-  token: string;
-}
-
-export interface OAuth1Credentials {
-  user_id: string;
-  oauth_token: string;
-  oauth_token_secret: string;
-}
-
-export type OAuthCredentials = OAuth1Credentials | OAuth2Credentials;
-
-export type AuthCredentials = FirebaseCredentials | OAuthCredentials;
-
 export interface FirebaseAuthState {
   uid: string;
   provider: AuthProviders;
   auth: Object;
   expires?: number;
-  github?: any;
+  github?: CommonOAuthCredential;
   google?: any;
   twitter?: any;
   facebook?: any;
@@ -76,41 +53,65 @@ export interface FirebaseAuthState {
   anonymous?: any;
 }
 
-export function authDataToAuthState(authData: FirebaseAuthDataAllProviders): FirebaseAuthState {
-  let {auth, uid, provider, github, twitter, facebook, google, password, anonymous} = authData;
-  let authState: FirebaseAuthState = { auth, uid, expires: authData.expires, provider: null };
-  switch (provider) {
-    case 'github':
-      authState.github = github;
+export interface CommonOAuthCredential {
+  accessToken: string;
+  provider: 'github.com' | 'google.com' | 'twitter.com' | 'facebook.com';
+}
+
+export interface GoogleCredential {
+  idToken: string;
+  provider: 'google.com';
+}
+
+export interface TwitterCredential extends CommonOAuthCredential {
+  secret: string;
+}
+
+export type OAuthCredential = CommonOAuthCredential | GoogleCredential | TwitterCredential;
+
+export function authDataToAuthState(authData: firebase.User, providerData?: OAuthCredential): FirebaseAuthState {
+  let { uid, providerData: [{providerId}] } = authData;
+  let authState: FirebaseAuthState = { auth: authData, uid, provider: null };
+  switch (providerId) {
+    case 'github.com':
+      authState.github = <CommonOAuthCredential>providerData;
       authState.provider = AuthProviders.Github;
       break;
-    case 'twitter':
-      authState.twitter = twitter;
+    case 'twitter.com':
+      authState.twitter = authData.providerData[0];
       authState.provider = AuthProviders.Twitter;
       break;
-    case 'facebook':
-      authState.facebook = facebook;
+    case 'facebook.com':
+      authState.facebook = authData.providerData[0];
       authState.provider = AuthProviders.Facebook;
       break;
-    case 'google':
-      authState.google = google;
+    case 'google.com':
+      authState.google = authData.providerData[0];
       authState.provider = AuthProviders.Google;
       break;
     case 'password':
-      authState.password = password;
+      authState.password = authData.providerData[0];
       authState.provider = AuthProviders.Password;
       break;
     case 'anonymous':
-      authState.anonymous = anonymous;
+      authState.anonymous = authData.providerData[0];
       authState.provider = AuthProviders.Anonymous;
       break;
     case 'custom':
       authState.provider = AuthProviders.Custom;
       break;
     default:
-      throw new Error(`Unsupported firebase auth provider ${provider}`);
+      throw new Error(`Unsupported firebase auth provider ${providerId}`);
   }
 
   return authState;
 }
 
+export interface EmailPasswordCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthToken {
+  token: string;
+}
