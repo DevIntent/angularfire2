@@ -49,7 +49,7 @@ const baseTwitterCredential: TwitterCredential = {
   secret: 'TWITTER_SECRET'
 };
 
-ddescribe('auth_backend', () => {
+describe('auth_backend', () => {
   describe('authDataToAuthState', () => {
     it('Github: should return a FirebaseAuthState object with full provider data', () => {
       let githubUser = Object.assign({}, baseFBUser, {
