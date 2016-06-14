@@ -101,6 +101,6 @@ describe('auth_backend', () => {
     });
 
     let actualAuthState = authDataToAuthState(facebookUser, baseFacebookCredential);
-    expect(actualAuthState.facebook).toEqual(baseFacebookCredential.accessToken);
+    expect(actualAuthState.facebook.accessToken).toEqual(baseFacebookCredential.accessToken);
   });
 });
