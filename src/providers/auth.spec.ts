@@ -324,9 +324,7 @@ describe('FirebaseAuth', () => {
       let options = {
         method: AuthMethods.CustomToken
       };
-      let credentials = {
-        token: 'myToken'
-      };
+      let credentials = 'myToken';
 
       beforeEach(() => {
         (<jasmine.Spy>authSpy.signInWithCustomToken).and.returnValue(Promise.resolve(firebaseUser));
