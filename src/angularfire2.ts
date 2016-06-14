@@ -14,7 +14,8 @@ import { FirebaseAppConfig } from './interfaces';
 import {
   AuthBackend,
   AuthMethods,
-  AuthProviders
+  AuthProviders,
+  FirebaseAuthState
 } from './providers/auth_backend';
 import {FirebaseSdkAuthBackend} from './providers/firebase_sdk_auth_backend';
 import {FirebaseDatabase} from './database/database';
@@ -25,16 +26,8 @@ export class AngularFire {
   object: (url: string, opts?:FirebaseObjectFactoryOpts) => FirebaseObjectObservable<any>;
   constructor(
     @Inject(FirebaseConfig) private fbUrl:string,
-    public auth:AngularFireAuth,
+    public auth: AngularFireAuth,
     public database: FirebaseDatabase) {}
-}
-
-function getAbsUrl (root:FirebaseAppConfig, url:string) {
-  if (!(/^[a-z]+:\/\/.*/.test(url))) {
-    // Provided url is relative.
-    url = root.databaseURL + url;
-  }
-  return url;
 }
 
 export const COMMON_PROVIDERS: any[] = [
@@ -76,6 +69,7 @@ export {
   FirebaseListFactory,
   FirebaseObjectFactory,
   firebaseAuthConfig,
+  FirebaseAuthState,
   AuthMethods,
   AuthProviders
 }
