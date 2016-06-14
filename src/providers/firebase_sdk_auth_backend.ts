@@ -34,7 +34,7 @@ export class FirebaseSdkAuthBackend extends AuthBackend {
   }
 
   createUser(creds: EmailPasswordCredentials): Promise<FirebaseAuthState> {
-    return this._fbAuth.createUserWithEmailAndPassword(creds.email, creds.password)
+    return <Promise<FirebaseAuthState>>this._fbAuth.createUserWithEmailAndPassword(creds.email, creds.password)
       .then((user: firebase.User) => authDataToAuthState(user));
   }
 
@@ -57,17 +57,17 @@ export class FirebaseSdkAuthBackend extends AuthBackend {
   }
 
   authWithCustomToken(token: AuthToken): Promise<FirebaseAuthState> {
-    return this._fbAuth.signInWithCustomToken(token.token)
+    return <Promise<FirebaseAuthState>>this._fbAuth.signInWithCustomToken(token.token)
       .then((user: firebase.User) => authDataToAuthState(user));
   }
 
   authAnonymously(): Promise<FirebaseAuthState> {
-    return this._fbAuth.signInAnonymously()
+    return <Promise<FirebaseAuthState>>this._fbAuth.signInAnonymously()
       .then((user: firebase.User) => authDataToAuthState(user));
   }
 
   authWithPassword(creds: EmailPasswordCredentials): Promise<FirebaseAuthState> {
-    return this._fbAuth.signInWithEmailAndPassword(creds.email, creds.password)
+    return <Promise<FirebaseAuthState>>this._fbAuth.signInWithEmailAndPassword(creds.email, creds.password)
       .then((user: firebase.User) => authDataToAuthState(user));
   }
 
@@ -76,7 +76,7 @@ export class FirebaseSdkAuthBackend extends AuthBackend {
     if (options.scope) {
       options.scope.forEach(scope => providerFromFirebase.addScope(scope));
     }
-    return this._fbAuth.signInWithPopup(providerFromFirebase);
+    return <Promise<firebase.auth.UserCredential>>this._fbAuth.signInWithPopup(providerFromFirebase);
   }
 
   /**
@@ -85,11 +85,11 @@ export class FirebaseSdkAuthBackend extends AuthBackend {
    * You should subscribe to the FirebaseAuth object to listen succesful login
    */
   authWithOAuthRedirect(provider: AuthProviders, options?: any): Promise<void> {
-    return this._fbAuth.signInWithRedirect(this._enumToAuthProvider(provider));
+    return <Promise<void>>this._fbAuth.signInWithRedirect(this._enumToAuthProvider(provider));
   }
 
   authWithOAuthToken(credential: firebase.auth.AuthCredential): Promise<FirebaseAuthState> {
-    return this._fbAuth.signInWithCredential(credential)
+    return <Promise<FirebaseAuthState>>this._fbAuth.signInWithCredential(credential)
       .then((user: firebase.User) => authDataToAuthState(user));
   }
 
