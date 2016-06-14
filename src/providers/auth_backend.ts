@@ -46,11 +46,9 @@ export interface FirebaseAuthState {
   auth: Object;
   expires?: number;
   github?: CommonOAuthCredential;
-  google?: any;
-  twitter?: any;
-  facebook?: any;
-  password?: any;
-  anonymous?: any;
+  google?: GoogleCredential;
+  twitter?: TwitterCredential;
+  facebook?: CommonOAuthCredential;
 }
 
 export interface CommonOAuthCredential {
@@ -78,23 +76,21 @@ export function authDataToAuthState(authData: firebase.User, providerData?: OAut
       authState.provider = AuthProviders.Github;
       break;
     case 'twitter.com':
-      authState.twitter = authData.providerData[0];
+      authState.twitter = <TwitterCredential>providerData;
       authState.provider = AuthProviders.Twitter;
       break;
     case 'facebook.com':
-      authState.facebook = authData.providerData[0];
+      authState.facebook = <CommonOAuthCredential>providerData;
       authState.provider = AuthProviders.Facebook;
       break;
     case 'google.com':
-      authState.google = authData.providerData[0];
+      authState.google = <GoogleCredential>providerData;
       authState.provider = AuthProviders.Google;
       break;
     case 'password':
-      authState.password = authData.providerData[0];
       authState.provider = AuthProviders.Password;
       break;
     case 'anonymous':
-      authState.anonymous = authData.providerData[0];
       authState.provider = AuthProviders.Anonymous;
       break;
     case 'custom':
