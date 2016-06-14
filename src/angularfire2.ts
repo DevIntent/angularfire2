@@ -40,12 +40,7 @@ function getAbsUrl (root:FirebaseAppConfig, url:string) {
 export const COMMON_PROVIDERS: any[] = [
   provide(FirebaseApp, {
     useFactory: (config: FirebaseAppConfig) => {
-      return initializeApp({
-        apiKey: config.apiKey,
-        authDomain: config.authDomain,
-        databaseURL: config.databaseURL,
-        storageBucket: config.storageBucket
-      });
+      return initializeApp(config);
     },
     deps: [FirebaseConfig]}),
   AngularFireAuth,
