@@ -5,6 +5,7 @@
 3. typealias firebase.Promise to Promise
 4. Union type FirebaseOAuthProvider
 5. Remove _noStructuralTyping from Promise classes
+6. Remove catch() and then() declarations from firebase.Thenable, and extend Promise<t>.
 
 */
 declare interface FirebaseService {
@@ -75,9 +76,8 @@ declare namespace firebase {
   type Subscribe = (a?: ((a: any) => void) | Observer, b?: (a: Object) => void, c?: () => void) => () => void;
 }
 declare namespace firebase {
-  interface Thenable<T> {
-    catch(onReject?: (a: Object) => any): any;
-    then(onResolve?: (a: T) => any, onReject?: (a: Object) => any): firebase.Thenable<any>;
+  interface Thenable<T> extends Promise<T> {
+    //Removed definitions of catch() and then(), and extended Promise.
   }
 }
 declare namespace firebase {
