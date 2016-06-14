@@ -10,7 +10,6 @@ import {
   AuthBackend,
   AuthProviders,
   AuthMethods,
-  AuthToken,
   EmailPasswordCredentials,
   OAuthCredential,
   AuthConfiguration,
@@ -36,11 +35,11 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
 
   public login(config?: AuthConfiguration): firebase.Promise<FirebaseAuthState>;
   // If logging in with email and password
-  public login(credentials?: EmailPasswordCredentials | firebase.auth.AuthCredential | AuthToken | string): firebase.Promise<FirebaseAuthState>;
-  public login(credentials: EmailPasswordCredentials | firebase.auth.AuthCredential | AuthToken | string, config?: AuthConfiguration): firebase.Promise<FirebaseAuthState>;
+  public login(credentials?: EmailPasswordCredentials | firebase.auth.AuthCredential | string): firebase.Promise<FirebaseAuthState>;
+  public login(credentials: EmailPasswordCredentials | firebase.auth.AuthCredential | string, config?: AuthConfiguration): firebase.Promise<FirebaseAuthState>;
   public login(obj1?: any, obj2?: AuthConfiguration): firebase.Promise<FirebaseAuthState> {
     let config: AuthConfiguration = null;
-    let credentials: EmailPasswordCredentials | firebase.auth.AuthCredential | string | AuthToken = null;
+    let credentials: EmailPasswordCredentials | firebase.auth.AuthCredential | string = null;
     if (arguments.length > 2) {
       return this._reject('Login only accepts a maximum of two arguments.');
     } else if (arguments.length == 2) {
@@ -91,7 +90,7 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
         return this._authBackend.authWithOAuthToken(<firebase.auth.AuthCredential>credentials,
           this._scrubConfig(config));
       case AuthMethods.CustomToken:
-        return this._authBackend.authWithCustomToken(<AuthToken>credentials);
+        return this._authBackend.authWithCustomToken(<string>credentials);
     }
   }
 

@@ -7,7 +7,6 @@ import {
   AuthProviders,
   AuthMethods,
   FirebaseAuthState,
-  AuthToken,
   EmailPasswordCredentials
 } from './auth_backend';
 import {FirebaseApp} from '../tokens';
@@ -56,8 +55,8 @@ export class FirebaseSdkAuthBackend extends AuthBackend {
     this._fbAuth.signOut();
   }
 
-  authWithCustomToken(token: AuthToken): Promise<FirebaseAuthState> {
-    return <Promise<FirebaseAuthState>>this._fbAuth.signInWithCustomToken(token.token)
+  authWithCustomToken(token: string): Promise<FirebaseAuthState> {
+    return <Promise<FirebaseAuthState>>this._fbAuth.signInWithCustomToken(token)
       .then((user: firebase.User) => authDataToAuthState(user));
   }
 

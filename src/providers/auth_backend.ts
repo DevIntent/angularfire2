@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 
 export abstract class AuthBackend {
-  abstract authWithCustomToken(token: AuthToken): Promise<FirebaseAuthState>;
+  abstract authWithCustomToken(token: string): Promise<FirebaseAuthState>;
   abstract authAnonymously(options?: any): Promise<FirebaseAuthState>;
   abstract authWithPassword(credentials: EmailPasswordCredentials): Promise<FirebaseAuthState>;
   abstract authWithOAuthPopup(provider: AuthProviders, options?: any): Promise<firebase.auth.UserCredential>;
@@ -106,8 +106,4 @@ export function authDataToAuthState(authData: firebase.User, providerData?: OAut
 export interface EmailPasswordCredentials {
   email: string;
   password: string;
-}
-
-export interface AuthToken {
-  token: string;
 }
