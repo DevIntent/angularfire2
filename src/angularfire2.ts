@@ -74,7 +74,6 @@ export {
   AuthProviders
 }
 
-export { AuthToken } from './providers/auth_backend';
 export { FirebaseConfig, FirebaseApp, FirebaseAuthConfig } from './tokens';
 export { FirebaseAppConfig } from './interfaces';
 
