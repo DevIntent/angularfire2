@@ -86,7 +86,7 @@ const AngularFireAuthState = <FirebaseAuthState>{
   }
 };
 
-ddescribe('FirebaseAuth', () => {
+describe('FirebaseAuth', () => {
   let app: firebase.app.App;
   let authData: any;
   let authCb: any;
