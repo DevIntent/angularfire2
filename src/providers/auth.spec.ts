@@ -70,7 +70,7 @@ const githubCredential = {
 const googleCredential = {
   credential: {},
   user: firebaseUser
-}
+};
 
 const AngularFireAuthState = <FirebaseAuthState>{
   provider: 0,

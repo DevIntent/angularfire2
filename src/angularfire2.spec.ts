@@ -47,7 +47,7 @@ describe('angularfire', () => {
 
   describe('things', () => {
 
-  })
+  });
   beforeEach(inject([FirebaseApp, AngularFire], (firebaseApp: firebase.app.App, _af: AngularFire) => {
     angularFire2 = _af;
     app = firebaseApp;
@@ -57,7 +57,7 @@ describe('angularfire', () => {
   }));
 
   afterEach((done) => {
-    rootRef.remove()
+    rootRef.remove();
     if(subscription && !subscription.isUnsubscribed) {
       subscription.unsubscribe();
     }
