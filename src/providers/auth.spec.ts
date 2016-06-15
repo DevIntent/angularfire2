@@ -141,24 +141,24 @@ describe('FirebaseAuth', () => {
     let count = 0;
     fbAuthObserver.next(null);
 
+    // Check that the first value is null
     afAuth
-      .do(() => count++)
-      .take(2)
-      .subscribe(authData => {
-        switch (count) {
-          case 1:
-            expect(authData).toBe(null);
-            // Not sure why this has to be wrapped in a setTimeout
-            setTimeout(() => fbAuthObserver.next(firebaseUser));
-            break;
-          case 2:
-            expect(authData.auth).toEqual(AngularFireAuthState.auth);
-            done();
-            break;
-          default:
-            throw new Error('Called too many times');
-        }
-      }, done.fail);
+      .take(1)
+      .do((authData) => {
+        expect(authData).toBe(null);
+        setTimeout(() => fbAuthObserver.next(firebaseUser));
+      })
+      .subscribe();
+
+    // Check the 2nd value emitted from the observable
+    afAuth
+      .skip(1)
+      .take(1)
+      .do((authData) => {
+        expect(authData.auth).toEqual(AngularFireAuthState.auth);
+      })
+      // Subsribes on next instead of complete to ensure a value is emitted
+      .subscribe(done, done.fail);
   }, 10);
 
   describe('AuthState', () => {
