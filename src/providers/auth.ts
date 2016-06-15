@@ -14,6 +14,7 @@ import {
   OAuthCredential,
   AuthConfiguration,
   FirebaseAuthState,
+  stripProviderId
 } from './auth_backend';
 
 const kBufferSize = 1;
@@ -26,6 +27,7 @@ export const firebaseAuthConfig = (config: AuthConfiguration): Provider => {
 
 @Injectable()
 export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
+  private _credentialCache: {[key:string]: OAuthCredential} = {};
   constructor(private _authBackend: AuthBackend,
     @Optional() @Inject(FirebaseAuthConfig) private _config?: AuthConfiguration) {
     super(kBufferSize);
@@ -76,7 +78,11 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
       case AuthMethods.Popup:
         return this._authBackend.authWithOAuthPopup(config.provider, this._scrubConfig(config))
           .then((userCredential: firebase.auth.UserCredential) => {
-            return authDataToAuthState(userCredential.user, <OAuthCredential>(<any>userCredential).credential)
+            console.log('userCredential', userCredential);
+            console.log('setting credential cache', userCredential.credential.provider, userCredential.credential)
+            // Incorrect type information
+            this._credentialCache[userCredential.credential.provider] = <OAuthCredential>userCredential.credential;
+            return authDataToAuthState(userCredential.user, <OAuthCredential>(<any>userCredential).credential);
           });
       case AuthMethods.Redirect:
         // Gets around typings issue since this method doesn't resolve with a user.
@@ -100,11 +106,6 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
 
   public getAuth(): FirebaseAuthState {
     return this._authBackend.getAuth()
-  }
-
-  //TODO: Make breaking change note
-  public onAuth(): Observable<FirebaseAuthState> {
-    return this._authBackend.onAuth();
   }
 
   public createUser(credentials: EmailPasswordCredentials): firebase.Promise<FirebaseAuthState> {
@@ -142,6 +143,16 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
     if (authData == null) {
       this.next(null);
     } else {
+      if (authData.auth && authData.auth.providerData && authData.auth.providerData[0]) {
+        let providerId = authData.auth.providerData[0].providerId;
+        let providerCredential = this._credentialCache[providerId];
+        if (providerCredential) {
+          authData = Object.assign({}, authData, {
+            [stripProviderId(providerId)]: providerCredential
+          });
+        }
+      }
+
       this.next(authData);
     }
   }

@@ -43,7 +43,7 @@ export interface AuthConfiguration {
 export interface FirebaseAuthState {
   uid: string;
   provider: AuthProviders;
-  auth: Object;
+  auth: firebase.User;
   expires?: number;
   github?: CommonOAuthCredential;
   google?: GoogleCredential;
@@ -101,6 +101,14 @@ export function authDataToAuthState(authData: firebase.User, providerData?: OAut
   }
 
   return authState;
+}
+
+export function stripProviderId (providerId: string): string {
+  let providerStripped = /(.*)\.com$/.exec(providerId);
+  if (providerStripped && providerStripped.length === 2) {
+    return providerStripped[1];
+  }
+  return null;
 }
 
 export interface EmailPasswordCredentials {

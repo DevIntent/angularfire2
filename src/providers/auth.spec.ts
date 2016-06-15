@@ -62,7 +62,7 @@ const firebaseUser = <firebase.User> {
 const githubCredential = {
   credential: {
     accessToken: 'ACCESS_TOKEN',
-    providerId: 'github.com'
+    provider: 'github.com'
   },
   user: firebaseUser
 };
@@ -383,8 +383,11 @@ describe('FirebaseAuth', () => {
         provider: AuthProviders.Github
       };
 
-      it('passes provider and options object to underlying method', () => {
+      beforeEach(() => {
         authSpy['signInWithPopup'].and.returnValue(Promise.resolve(githubCredential));
+      })
+
+      it('passes provider and options object to underlying method', () => {
         let customOptions = Object.assign({}, options);
         customOptions.scope = ['email'];
         afAuth.login(customOptions);
@@ -400,13 +403,26 @@ describe('FirebaseAuth', () => {
       });
 
       it('will resolve the promise upon authentication', (done: any) => {
-        authSpy['signInWithPopup'].and.returnValue(Promise.resolve(githubCredential));
         afAuth.login(options)
           .then(result => {
             expect(result.auth).toEqual(AngularFireAuthState.auth);
           })
           .then(done, done.fail);
       });
+
+      it('should include credentials in onAuth payload after logging in', (done) => {
+        afAuth
+          .do((user: FirebaseAuthState) => {
+            expect(user.github).toBe(githubCredential.credential);
+          })
+          .subscribe(done, done.fail);
+
+        afAuth.login(options)
+          .then(() => {
+            // Calling with undefined `github` value to mimick actual Firebase value
+            fbAuthObserver.next(firebaseUser);
+          });
+      }, 10);
     });
 
     describe('authWithOAuthRedirect', () => {
