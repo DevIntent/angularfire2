@@ -8,7 +8,7 @@ import {
   FirebaseApp
 } from 'angularfire2';
 
-import { COMMON_CONFIG } from 'test/config';
+import { COMMON_CONFIG } from '../../../src/test-config';
 
 enableProdMode();
 

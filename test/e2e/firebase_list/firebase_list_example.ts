@@ -10,7 +10,7 @@ import {
 
 enableProdMode();
 
-import { COMMON_CONFIG } from 'test/config';
+import { COMMON_CONFIG } from '../../../src/test-config';
 
 @Component({
   template: `
