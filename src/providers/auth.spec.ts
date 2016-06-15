@@ -1,5 +1,4 @@
-/// <reference path="../../manual_typings/manual_typings.d.ts" />
-
+import { auth, initializeApp } from 'firebase';
 import {
   beforeEachProviders,
   expect,
@@ -25,13 +24,10 @@ import {
   firebaseAuthConfig,
   AuthProviders
 } from '../angularfire2';
-import {
-  firebaseConfig
-} from '../angularfire2.spec';
+import { COMMON_CONFIG } from '../test-config';
 
 import {AuthBackend} from './auth_backend';
 import {FirebaseSdkAuthBackend} from './firebase_sdk_auth_backend';
-import { auth, initializeApp } from 'firebase';
 
 // Set providers from firebase so no firebase.auth.GoogleProvider() necessary
 const {
@@ -97,7 +93,7 @@ describe('FirebaseAuth', () => {
 
   beforeEachProviders(() => [
     FIREBASE_PROVIDERS,
-    defaultFirebase(firebaseConfig),
+    defaultFirebase(COMMON_CONFIG),
     provide(FirebaseApp, {
       useFactory: (config: FirebaseAppConfig) => {
         var app = initializeApp(config);
