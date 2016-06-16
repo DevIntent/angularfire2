@@ -2,6 +2,12 @@ import {Provider, Inject, provide, Injectable, Optional} from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
+
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/concat';
+import 'rxjs/add/operator/skip';
+
 import {FirebaseApp, FirebaseAuthConfig} from '../tokens';
 import {isPresent} from '../utils/utils';
 import * as utils from '../utils/utils';
@@ -32,7 +38,24 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
     @Optional() @Inject(FirebaseAuthConfig) private _config?: AuthConfiguration) {
     super(kBufferSize);
 
-    this._authBackend.onAuth().subscribe((authData: FirebaseAuthState) => this._emitAuthData(authData));
+    let firstPass = true;
+    this._authBackend.onAuth()
+      .mergeMap((authState: FirebaseAuthState) => {
+        // TODO: get rid of side effect
+        if (firstPass) {
+          firstPass = false;
+          return this._authBackend.getRedirectResult()
+            .map((userCredential: firebase.auth.UserCredential) => {
+              if (userCredential) {
+                authState = attachCredentialToAuthState(authState, userCredential.credential, userCredential.credential.provider);
+                this._credentialCache[userCredential.credential.provider] = <OAuthCredential>userCredential.credential;
+              }
+              return authState;
+            })
+        }
+        return Observable.of(authState);
+      })
+      .subscribe((authData: FirebaseAuthState) => this._emitAuthData(authData));
   }
 
   public login(config?: AuthConfiguration): firebase.Promise<FirebaseAuthState>;
@@ -78,8 +101,6 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
       case AuthMethods.Popup:
         return this._authBackend.authWithOAuthPopup(config.provider, this._scrubConfig(config))
           .then((userCredential: firebase.auth.UserCredential) => {
-            console.log('userCredential', userCredential);
-            console.log('setting credential cache', userCredential.credential.provider, userCredential.credential)
             // Incorrect type information
             this._credentialCache[userCredential.credential.provider] = <OAuthCredential>userCredential.credential;
             return authDataToAuthState(userCredential.user, <OAuthCredential>(<any>userCredential).credential);
@@ -147,9 +168,7 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
         let providerId = authData.auth.providerData[0].providerId;
         let providerCredential = this._credentialCache[providerId];
         if (providerCredential) {
-          authData = Object.assign({}, authData, {
-            [stripProviderId(providerId)]: providerCredential
-          });
+          authData = attachCredentialToAuthState(authData, providerCredential, providerId);
         }
       }
 
@@ -158,3 +177,9 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
   }
 }
 
+function attachCredentialToAuthState (authState: FirebaseAuthState, credential, providerId: string): FirebaseAuthState {
+  if (!authState) return authState;
+  // TODO make authState immutable
+  authState[stripProviderId(providerId)] = credential;
+  return authState;
+}

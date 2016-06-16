@@ -10,8 +10,10 @@ import {
   beforeEach
 } from '@angular/core/testing';
 import {ReflectiveInjector, provide, Provider} from '@angular/core';
-import {Observable} from 'rxjs/Observable'
+import { Observable } from 'rxjs/Observable'
 import { Observer } from 'rxjs/Observer';
+import 'rxjs/add/operator/do';
+
 import {
   defaultFirebase,
   FIREBASE_PROVIDERS,
@@ -37,6 +39,7 @@ const {
 } = auth;
 
 const authMethods = [
+  'getRedirectResult',
   'signInWithCustomToken',
   'signInAnonymously',
   'signInWithEmailAndPassword',
@@ -55,6 +58,7 @@ const firebaseUser = <firebase.User> {
   uid: '12345',
   providerData: [{
     'displayName': 'jeffbcross',
+    // TODO verify this property name
     providerId: 'github.com'
   }]
 };
@@ -117,6 +121,7 @@ describe('FirebaseAuth', () => {
       .and.callFake((obs: Observer<firebase.User>) => {
         fbAuthObserver = obs;
       });
+    authSpy['getRedirectResult'].and.returnValue(Promise.resolve(null));
 
     inject([FirebaseApp, AngularFireAuth], (_app: firebase.app.App, _afAuth: AngularFireAuth) => {
       app = _app;
@@ -158,7 +163,7 @@ describe('FirebaseAuth', () => {
         expect(authData.auth).toEqual(AngularFireAuthState.auth);
       })
       // Subsribes on next instead of complete to ensure a value is emitted
-      .subscribe(done, done.fail);
+      .subscribe(null, done.fail, done);
   }, 10);
 
   describe('AuthState', () => {
@@ -168,8 +173,7 @@ describe('FirebaseAuth', () => {
         .take(1)
         .subscribe((data) => {
           expect(data.auth).toEqual(AngularFireAuthState.auth);
-          done();
-        }, done.fail);
+        }, done.fail, done);
     });
 
     it('should be null if user is not authed', (done) => {
@@ -178,7 +182,6 @@ describe('FirebaseAuth', () => {
         .take(1)
         .subscribe(authData => {
           expect(authData).toBe(null);
-          done();
         }, done.fail, done);
     });
   });
@@ -254,7 +257,7 @@ describe('FirebaseAuth', () => {
       };
       let afAuth = new AngularFireAuth(backend, config);
       afAuth.login()
-        .then(done.fail, done);;
+        .then(done.fail, done);
     });
 
     it('should reject if oauth token is used without credentials', (done: any) => {
@@ -412,6 +415,7 @@ describe('FirebaseAuth', () => {
 
       it('should include credentials in onAuth payload after logging in', (done) => {
         afAuth
+          .take(1)
           .do((user: FirebaseAuthState) => {
             expect(user.github).toBe(githubCredential.credential);
           })
@@ -452,6 +456,26 @@ describe('FirebaseAuth', () => {
           })
           .then(done, done.fail);
       });
+
+      it('should include credentials in onAuth payload after logging in', (done) => {
+        authSpy['getRedirectResult'].and.returnValue(Promise.resolve(githubCredential));
+        afAuth
+          .do((user: FirebaseAuthState) => {
+            expect(user.github).toBe(githubCredential.credential);
+          })
+          .take(2)
+          .subscribe(null, done.fail, done);
+
+        afAuth.login(options)
+          .then(() => {
+            // Calling with undefined `github` value to mimick actual Firebase value
+            fbAuthObserver.next(firebaseUser);
+          })
+          .then(() => {
+            // Call it twice to make sure it caches the result
+            fbAuthObserver.next(firebaseUser);
+          });
+      }, 10);
     });
 
     describe('authWithOAuthToken', () => {

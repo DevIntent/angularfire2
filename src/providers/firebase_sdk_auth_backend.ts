@@ -20,8 +20,8 @@ const {
   TwitterAuthProvider
 } = auth;
 
-import { take } from 'rxjs/operator/take';
-import { map } from 'rxjs/operator/map';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/fromPromise';
 
 @Injectable()
 export class FirebaseSdkAuthBackend extends AuthBackend {
@@ -43,9 +43,10 @@ export class FirebaseSdkAuthBackend extends AuthBackend {
 
   onAuth(): Observable<FirebaseAuthState> {
     // TODO: assumes this will accept an RxJS observer
-    return map.call(Observable.create((observer: Observer<FirebaseAuthState>) => {
+    return Observable.create((observer: Observer<FirebaseAuthState>) => {
       return this._fbAuth.onAuthStateChanged(observer);
-    }), (user: firebase.User) => {
+    })
+    .map((user: firebase.User) => {
       if (!user) return null;
       return authDataToAuthState(user);
     });
@@ -90,6 +91,10 @@ export class FirebaseSdkAuthBackend extends AuthBackend {
   authWithOAuthToken(credential: firebase.auth.AuthCredential): Promise<FirebaseAuthState> {
     return <Promise<FirebaseAuthState>>this._fbAuth.signInWithCredential(credential)
       .then((user: firebase.User) => authDataToAuthState(user));
+  }
+
+  getRedirectResult(): Observable<firebase.auth.UserCredential> {
+    return Observable.fromPromise(this._fbAuth.getRedirectResult());
   }
 
   private _enumToAuthProvider(providerId: AuthProviders): firebase.auth.AuthProvider | FirebaseOAuthProvider {
