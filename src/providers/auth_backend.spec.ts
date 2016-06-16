@@ -16,10 +16,12 @@ import {
   TwitterCredential
 } from './auth_backend';
 
-const baseFBUser = {
+const baseFBUser = <firebase.User> {
   uid: '12345',
-  providerId: '',
-  providerData: [{}]
+  providerData: [{
+    'displayName': 'jeffbcross',
+    providerId: ''
+  }]
 };
 
 const baseAuthState: FirebaseAuthState = {

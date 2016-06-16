@@ -17,12 +17,13 @@ declare interface FirebaseServiceNamespace {
   app(app?: firebase.app.App): FirebaseService;
 }
 
-declare interface Observer {
-  complete(): any;
-  error(error: Object): any;
-  next(value: any): any;
+declare namespace firebase {
+  interface Observer {
+    complete():any;
+    error(error:Object):any;
+    next(value:any):any;
+  }
 }
-
 
 declare type FirebaseOAuthProvider = firebase.auth.GithubAuthProvider |
                                      firebase.auth.GoogleAuthProvider |

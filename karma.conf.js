@@ -25,7 +25,6 @@ module.exports = function(config) {
       { pattern: 'node_modules/rxjs/**/*.js', included: false, watched: false },
       { pattern: 'node_modules/rxjs/**/*.js.map', included: false, watched: false },
 
-
       {pattern: 'karma-test-shim.js', included: true, watched: true},
       {pattern: 'built/test/matchers.js', included: true, watched: true},
 
@@ -36,7 +35,6 @@ module.exports = function(config) {
 
       {pattern: 'node_modules/firebase/firebase.js', included: false, watched: false},
       {pattern: 'dist/**/*.js', included: false, watched: true},
-      {pattern: 'dist/**/*.js.map', included: false, watched: false},
       {pattern: 'src/**/*.ts', included: false, watched: false}
     ],
 

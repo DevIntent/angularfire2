@@ -6,14 +6,15 @@
     "noImplicitAny": false,
     "outDir": "dist/es6",
     "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "./",
+    "inlineSources": true,
+    "inlineSourceMap": true,
     "declaration": true,
     "removeComments": true,
     "moduleResolution": "node"
   },
   "files": [
     "src/angularfire2.ts",
+    "typings/main.d.ts",
     "manual_typings/firebase3/firebase3.d.ts"
   ]
 }

@@ -7,8 +7,8 @@
     "noImplicitAny": false,
     "outDir": "dist",
     "rootDir": "src",
-    "sourceMap": true,
     "inlineSources": true,
+    "inlineSourceMap": true,
     "declaration": true,
     "removeComments": true
   },

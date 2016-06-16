@@ -1,6 +1,5 @@
 import {Provider, Inject, provide, Injectable, Optional} from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
+import { ArrayObservable } from 'rxjs/observable/ArrayObservable';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 import 'rxjs/add/operator/mergeMap';
@@ -8,13 +7,11 @@ import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/concat';
 import 'rxjs/add/operator/skip';
 
-import {FirebaseApp, FirebaseAuthConfig} from '../tokens';
+import {FirebaseAuthConfig} from '../tokens';
 import {isPresent} from '../utils/utils';
-import * as utils from '../utils/utils';
 import {
   authDataToAuthState,
   AuthBackend,
-  AuthProviders,
   AuthMethods,
   EmailPasswordCredentials,
   OAuthCredential,
@@ -53,7 +50,7 @@ export class AngularFireAuth extends ReplaySubject<FirebaseAuthState> {
               return authState;
             })
         }
-        return Observable.of(authState);
+        return ArrayObservable.of(authState);
       })
       .subscribe((authData: FirebaseAuthState) => this._emitAuthData(authData));
   }

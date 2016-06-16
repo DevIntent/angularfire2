@@ -52,14 +52,16 @@ export interface FirebaseAuthState {
   facebook?: CommonOAuthCredential;
 }
 
+export type OAuthProvider = 'github.com' | 'google.com' | 'twitter.com' | 'facebook.com';
+
 export interface CommonOAuthCredential {
   accessToken: string;
-  provider: 'github.com' | 'google.com' | 'twitter.com' | 'facebook.com';
+  provider: OAuthProvider;
 }
 
-export interface GoogleCredential {
+export class GoogleCredential {
   idToken: string;
-  provider: 'google.com';
+  provider: string = 'google.com';
 }
 
 export interface TwitterCredential extends CommonOAuthCredential {
@@ -69,8 +71,8 @@ export interface TwitterCredential extends CommonOAuthCredential {
 export type OAuthCredential = CommonOAuthCredential | GoogleCredential | TwitterCredential;
 
 export function authDataToAuthState(authData: firebase.User, providerData?: OAuthCredential): FirebaseAuthState {
-  let { uid, providerData: [{providerId}] } = authData;
-  let authState: FirebaseAuthState = { auth: authData, uid, provider: null };
+  let { providerData: [{providerId}] } = authData;
+  let authState: FirebaseAuthState = { auth: authData, uid: authData.uid, provider: null };
   switch (providerId) {
     case 'github.com':
       authState.github = <CommonOAuthCredential>providerData;
