@@ -12,6 +12,7 @@ export abstract class AuthBackend {
   abstract getAuth(): FirebaseAuthState;
   abstract unauth(): void;
   abstract createUser(credentials: EmailPasswordCredentials): Promise<FirebaseAuthState>;
+  abstract getRedirectResult(): Observable<firebase.auth.UserCredential>;
 }
 
 export enum AuthProviders {
@@ -43,7 +44,7 @@ export interface AuthConfiguration {
 export interface FirebaseAuthState {
   uid: string;
   provider: AuthProviders;
-  auth: Object;
+  auth: firebase.User;
   expires?: number;
   github?: CommonOAuthCredential;
   google?: GoogleCredential;
@@ -101,6 +102,14 @@ export function authDataToAuthState(authData: firebase.User, providerData?: OAut
   }
 
   return authState;
+}
+
+export function stripProviderId (providerId: string): string {
+  let providerStripped = /(.*)\.com$/.exec(providerId);
+  if (providerStripped && providerStripped.length === 2) {
+    return providerStripped[1];
+  }
+  return null;
 }
 
 export interface EmailPasswordCredentials {
